@@ -1,0 +1,18 @@
+{% extends 'videos/base.html' %}
+
+{% block content %}
+    <div class="container">
+        <div class="row justify-content-center">
+            {% for object in query_list %}
+            <div class="col-md-4 col-sm-12 mr-md-2 mt-5 p-3">
+                <a href="{% url 'video-detail' object.pk %}"><img src="/media/{{ object.thumbnail }}" width="358" height="202"></a>
+                <div class="card-body">
+                    <a class="link-text" href="{% url 'video-detail' object.pk %}"><h4 class="text-center" style="color: aliceblue;">{{ object.title }} </h4></a>
+					<h5 class="text-center"> <a class="mt-4" href="{% url 'profile' object.uploader.pk %}">{{ object.uploader }}</a></h5>
+					<p class="text-center">{{ object.date_posted | date:"M d, Y" }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock content %}

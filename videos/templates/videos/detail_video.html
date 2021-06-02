@@ -1,0 +1,92 @@
+{% extends 'videos/base.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+<div class="container" style="margin-left: 200px;">
+   <div class="row mt-5">
+      <div class="col-md-11">
+         <video-js
+            width="720"
+            height="405"
+            controls
+            data-setup='{"playbackRates": [0.5, 1, 1.5, 2], "fluid": true}'>
+            <source src="/media/{{ object.video_file }}" type="video/mp4">
+         </video-js>
+         <h4 class="mt-4">{{ object.title }}</h4>
+         <h6 class="col-md-6 text-muted"> <a  href="{% url 'profile' object.uploader.profile.pk %}"><img src="{{ object.uploader.profile.image.url }}" width="40" height="40" class="d-inline-block rounded-circle" alt="Profile"></a>  <a class="mt-4" href="{% url 'profile' object.uploader.pk %}">{{ object.uploader }}</a></h6>
+         <h6 class="col-md-6 text-muted">Date Posted: {{ object.date_posted | date:"M d, Y" }}</h6>
+         <h6 class="col-md-6 text-muted">{{ object.description }}</h6>
+         <div class="row">
+            <div class="col-md-6 text-muted">
+               <a class="category-link" href="{% url 'category-list' object.category.pk %}">#{{ object.category }}</a>
+            </div>
+            <div class="col-md-6 text-muted text-right">                    
+            </div>
+         </div>
+         {% if object.uploader == user %}
+         <a class="video-icons icon-color" href="{% url 'video-update' object.pk %}">
+            <span class="material-icons">edit</span>
+         </a>
+         <a class="video-icons icon-color" href="{% url 'video-delete' object.pk %}">
+           <span class="material-icons">delete</span>
+         </a>
+         {% endif %}
+      </div>
+      <div class="col-md-1">
+         {% for category in categories %}
+         {% if object.pk != category.pk %}
+         <div class="d-flex flex-row py-3" style="padding-left: 30px;">
+            <img src="{{ category.thumbnail.url }}" width="250" height="150"/>
+            <h5 class="pl-3">{{ category.title }} <a class="mt-4" style="font-size: smaller;" href="{% url 'profile' object.uploader.pk %}">{{ category.uploader }}</a></h5>
+            <a href="{% url 'video-detail' category.pk %}" class="stretched-link" ></a>
+         </div>
+         {% endif %}
+         {% endfor %}
+      </div>
+   </div>
+   <div class="d-flex flex-row">
+      <form method="POST" action="{% url 'like' object.pk %}">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ request.path }}">
+          <button style="background-color: transparent; border: none;" type="submit">
+              <i class="video-icons icon-color"><span class="material-icons">thumb_up</span><span>  {{ object.likes.all.count }}</span></i>
+          </button>
+      </form>
+
+      <form method="POST" action="{% url 'dislike' object.pk %}">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ request.path }}">
+          <button style="background-color: transparent; border: none;" type="submit">
+              <i class="video-icons icon-color"><span class="material-icons">thumb_down</span><span>  {{ object.dislikes.all.count }}</span></i>
+          </button>
+      </form>
+   </div>
+   <div class="row mt-3">
+      <div class="col-md-8 col-sm-12">
+         {% if user.is_authenticated %}
+         <form method="POST">
+            {% csrf_token %}
+            {{ form | crispy }}
+            <button class="btn btn-outline-info btn-block">Post</button>
+         </form>
+         {% else %}
+         <a class="btn btn-outline-info btn-block" href="{% url 'account_login' %}">Sign In To Post a Comment!</a>
+         {% endif %}
+      </div>
+   </div>
+   <div style="padding-top: 50px">
+      <h2>Previous Comments:</h2>
+   </div>
+   {% for comment in comments %}
+   <div class="row mt-3">
+      <div class="col-md-8 col-sm-12" >
+         <h6> <a  href="{% url 'profile' comment.user.pk %}"><img src="{{ comment.user.profile.image.url }}" width="28" height="28" class="d-inline-block rounded-circle" alt="Profile"></a> <a style="font-size: 20px; color: aliceblue; text-decoration: none;" href="{% url 'profile' comment.user.pk %}">{{ comment.user }} :</a></h6>
+         <h5>
+         {{ comment.comment }}
+         <h5>
+      </div>
+   </div>
+   {% endfor %}
+</div>
+<br>
+<br>
+{% endblock content %}
